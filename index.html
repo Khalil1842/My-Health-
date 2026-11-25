@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="description" content="MY HEALTH - rekod kesihatan peribadi">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>MY HEALTH</title>
+<style>
+:root{--green:#0f766e;--green2:#14b8a6;--bg:#f3f7f7;--ink:#173331;--muted:#66807d;--card:#fff;--line:#e1ecea;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:linear-gradient(135deg,#115e59,#0f766e);color:white;padding:22px 18px 26px;border-radius:0 0 24px 24px}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:43px;height:43px;background:#ffffff20;border:1px solid #ffffff55;border-radius:14px;display:grid;place-items:center;font-size:23px}
+h1{font-size:20px;margin:0}header p{margin:3px 0 0;color:#d5f5f0;font-size:12px}
+main{max-width:680px;margin:auto;padding:16px 14px 92px}.section-title{font-size:17px;font-weight:750;margin:18px 2px 10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:14px;box-shadow:0 2px 8px #1232}
+.metric-label{color:var(--muted);font-size:12px}.metric{font-size:25px;font-weight:800;margin-top:5px}.unit{font-size:12px;color:var(--muted);font-weight:500}
+.tabs{display:flex;gap:7px;overflow:auto;margin:15px 0}.tab{border:1px solid var(--line);background:white;color:var(--muted);border-radius:999px;padding:10px 14px;font-weight:650;white-space:nowrap}.tab.active{background:var(--green);color:white;border-color:var(--green)}
+.panel{display:none}.panel.active{display:block}.field{margin:12px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+input,select,textarea{width:100%;border:1px solid #cbdad7;border-radius:11px;padding:12px;background:#fff;color:var(--ink);font:inherit;outline-color:var(--green)}
+textarea{min-height:78px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:0;border-radius:12px;padding:13px 16px;background:var(--green);color:white;font:700 14px system-ui;width:100%;margin-top:8px}.btn.secondary{background:#e1f2ef;color:#115e59}.btn.danger{background:#fff0ee;color:var(--red)}
+.small{font-size:12px;color:var(--muted);line-height:1.5}.record{padding:13px 0;border-bottom:1px solid var(--line)}.record strong{display:block}.record p{margin:4px 0;color:var(--muted);font-size:13px}
+.empty{padding:20px;text-align:center;color:var(--muted);background:white;border:1px dashed #bfd1ce;border-radius:14px}
+.notice{background:#fff8e6;border:1px solid #f3d58a;border-radius:13px;padding:12px;font-size:12px;line-height:1.5;color:#694c00}
+canvas{width:100%;height:190px;background:white;border-radius:14px}
+footer{position:fixed;bottom:0;left:0;right:0;background:#ffffffed;border-top:1px solid var(--line);padding:10px max(14px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:center}
+footer span{font-size:11px;color:var(--muted)}
+@media(min-width:600px){main{padding-top:22px}.metric{font-size:29px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">♥</div><div><h1>MY HEALTH</h1><p>Personal Health Tracker</p></div></div></header>
+<main>
+<div class="section-title">Ringkasan kesihatan</div>
+<div class="grid">
+ <div class="card"><div class="metric-label">Berat terkini</div><div class="metric" id="latestWeight">— <span class="unit">kg</span></div></div>
+ <div class="card"><div class="metric-label">Tekanan darah</div><div class="metric" id="latestBP">—</div><div class="unit">mmHg</div></div>
+ <div class="card"><div class="metric-label">Gula darah terkini</div><div class="metric" id="latestSugar">—</div><div class="unit">mmol/L</div></div>
+ <div class="card"><div class="metric-label">Jumlah rekod</div><div class="metric" id="totalRecords">0</div><div class="unit">rekod disimpan</div></div>
+</div>
+<div class="tabs">
+ <button class="tab active" data-tab="add">＋ Rekod</button>
+ <button class="tab" data-tab="history">Sejarah</button>
+ <button class="tab" data-tab="charts">Graf</button>
+ <button class="tab" data-tab="blood">Ujian darah</button>
+ <button class="tab" data-tab="settings">Tetapan</button>
+</div>
+<section id="add" class="panel active">
+ <div class="section-title">Rekod harian</div>
+ <form id="dailyForm">
+  <div class="field"><label for="date">Tarikh</label><input id="date" type="date" required></div>
+  <div class="field"><label for="weight">Berat badan (kg)</label><input id="weight" type="number" min="1" max="500" step="0.1" placeholder="Contoh: 96"></div>
+  <div class="row">
+   <div class="field"><label for="sys">Tekanan sistolik</label><input id="sys" type="number" min="50" max="300" placeholder="Contoh: 120"></div>
+   <div class="field"><label for="dia">Tekanan diastolik</label><input id="dia" type="number" min="30" max="200" placeholder="Contoh: 80"></div>
+  </div>
+  <div class="field"><label for="sugar">Gula darah (mmol/L)</label><input id="sugar" type="number" min="1" max="50" step="0.1" placeholder="Contoh: 5.9"></div>
+  <div class="field"><label for="symptom">Simptom</label><select id="symptom"><option>Tiada</option><option>Sakit kepala</option><option>Telinga berdesing</option><option>Sakit belakang</option><option>Pening</option><option>Demam / batuk</option><option>Lain-lain</option></select></div>
+  <div class="field"><label for="notes">Catatan</label><textarea id="notes" placeholder="Catatan tambahan, ubat, keadaan badan..."></textarea></div>
+  <button class="btn" type="submit">Simpan rekod</button>
+ </form>
+</section>
+<section id="history" class="panel">
+ <div class="section-title">Sejarah rekod</div><div id="historyList"></div>
+ <button class="btn secondary" id="exportCsv">Eksport rekod CSV</button>
+</section>
+<section id="charts" class="panel">
+ <div class="section-title">Trend berat badan</div><canvas id="weightChart" width="640" height="240"></canvas>
+ <p class="small">Graf menggunakan rekod berat yang telah disimpan.</p>
+</section>
+<section id="blood" class="panel">
+ <div class="section-title">Keputusan ujian darah</div>
+ <form id="bloodForm">
+  <div class="field"><label for="bloodDate">Tarikh ujian</label><input id="bloodDate" type="date" required></div>
+  <div class="row"><div class="field"><label for="creatinine">Creatinine</label><input id="creatinine" type="number" step="0.1" placeholder="µmol/L"></div><div class="field"><label for="egfr">eGFR</label><input id="egfr" type="number" step="0.1" placeholder="mL/min/1.73m²"></div></div>
+  <div class="row"><div class="field"><label for="uric">Uric acid</label><input id="uric" type="number" step="1" placeholder="µmol/L"></div><div class="field"><label for="ldl">LDL</label><input id="ldl" type="number" step="0.01" placeholder="mmol/L"></div></div>
+  <div class="field"><label for="hba1c">HbA1c (%)</label><input id="hba1c" type="number" step="0.1" placeholder="Contoh: 5.9"></div>
+  <div class="field"><label for="bloodNotes">Nota ujian</label><textarea id="bloodNotes" placeholder="Nama makmal, nasihat doktor..."></textarea></div>
+  <button class="btn" type="submit">Simpan keputusan</button>
+ </form>
+ <div class="section-title">Sejarah ujian darah</div><div id="bloodList"></div>
+</section>
+<section id="settings" class="panel">
+ <div class="section-title">Data & privasi</div>
+ <div class="notice">Data disimpan dalam storan browser pada telefon ini. Ia tidak disegerakkan ke cloud. Jangan padam data browser jika mahu mengekalkan rekod. Buat backup secara berkala melalui eksport.</div>
+ <button class="btn secondary" id="backup">Muat turun backup JSON</button>
+ <div class="field"><label for="restoreFile">Pulihkan backup JSON</label><input type="file" id="restoreFile" accept=".json,application/json"></div>
+ <button class="btn danger" id="clearData">Padam semua data</button>
+ <p class="small">Aplikasi ini untuk rekod peribadi dan bukan alat diagnosis. Semak keputusan dengan profesional kesihatan.</p>
+</section>
+</main>
+<footer><span>MY HEALTH • Rekod kesihatan peribadi • Data setempat pada peranti</span></footer>
+<script>
+const KEY='myhealth_v1';
+let data=JSON.parse(localStorage.getItem(KEY)||'{"daily":[],"blood":[]}');
+const $=id=>document.getElementById(id);
+const today=new Date().toISOString().slice(0,10); $('date').value=today; $('bloodDate').value=today;
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function num(v){return v===''?null:Number(v)}
+function render(){
+ const d=[...data.daily].sort((a,b)=>b.date.localeCompare(a.date));
+ const latest=d[0];
+ $('latestWeight').innerHTML=latest?.weight!=null?`${latest.weight} <span class="unit">kg</span>`:'—';
+ $('latestBP').textContent=latest?.sys&&latest?.dia?`${latest.sys}/${latest.dia}`:'—';
+ $('latestSugar').textContent=latest?.sugar??'—'; $('totalRecords').textContent=data.daily.length;
+ $('historyList').innerHTML=d.length?d.map(x=>`<div class="record"><strong>${escapeHtml(x.date)} · ${escapeHtml(x.symptom||'Tiada simptom')}</strong><p>Berat: ${x.weight??'—'} kg · BP: ${x.sys??'—'}/${x.dia??'—'} · Gula: ${x.sugar??'—'} mmol/L</p><p>${escapeHtml(x.notes||'')}</p><button class="btn danger" style="width:auto;padding:7px 11px;margin:2px 0" onclick="deleteDaily('${x.id}')">Padam</button></div>`).join(''):'<div class="empty">Belum ada rekod.</div>';
+ $('bloodList').innerHTML=data.blood.length?[...data.blood].sort((a,b)=>b.date.localeCompare(a.date)).map(x=>`<div class="record"><strong>${escapeHtml(x.date)}</strong><p>Creatinine: ${x.creatinine??'—'} · eGFR: ${x.egfr??'—'} · Uric acid: ${x.uric??'—'}</p><p>LDL: ${x.ldl??'—'} · HbA1c: ${x.hba1c??'—'}%</p><p>${escapeHtml(x.notes||'')}</p><button class="btn danger" style="width:auto;padding:7px 11px;margin:2px 0" onclick="deleteBlood('${x.id}')">Padam</button></div>`).join(''):'<div class="empty">Belum ada keputusan ujian darah.</div>';
+ drawChart(d.filter(x=>x.weight!=null).reverse());
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function id(){return crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()}
+$('dailyForm').addEventListener('submit',e=>{e.preventDefault();const x={id:id(),date:$('date').value,weight:num($('weight').value),sys:num($('sys').value),dia:num($('dia').value),sugar:num($('sugar').value),symptom:$('symptom').value,notes:$('notes').value.trim()};if(!x.weight&&!x.sys&&!x.dia&&!x.sugar&&x.symptom==='Tiada'&&!x.notes){alert('Masukkan sekurang-kurangnya satu maklumat.');return}data.daily.push(x);save();e.target.reset();$('date').value=today;alert('Rekod disimpan dalam telefon.');});
+$('bloodForm').addEventListener('submit',e=>{e.preventDefault();const x={id:id(),date:$('bloodDate').value,creatinine:num($('creatinine').value),egfr:num($('egfr').value),uric:num($('uric').value),ldl:num($('ldl').value),hba1c:num($('hba1c').value),notes:$('bloodNotes').value.trim()};data.blood.push(x);save();e.target.reset();$('bloodDate').value=today;alert('Keputusan ujian disimpan.');});
+window.deleteDaily=id=>{if(confirm('Padam rekod ini?')){data.daily=data.daily.filter(x=>x.id!==id);save()}};
+window.deleteBlood=id=>{if(confirm('Padam keputusan ini?')){data.blood=data.blood.filter(x=>x.id!==id);save()}};
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.tab).classList.add('active');if(b.dataset.tab==='charts')drawChart([...data.daily].sort((a,b)=>a.date.localeCompare(b.date)).filter(x=>x.weight!=null))}));
+function drawChart(items){const c=$('weightChart'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#66807d';ctx.font='14px system-ui';if(!items.length){ctx.fillText('Belum ada data berat badan',20,40);return}const vals=items.map(x=>x.weight),min=Math.min(...vals)-1,max=Math.max(...vals)+1;ctx.strokeStyle='#d5e4e1';ctx.lineWidth=1;for(let i=0;i<5;i++){let y=20+i*48;ctx.beginPath();ctx.moveTo(45,y);ctx.lineTo(615,y);ctx.stroke()}ctx.fillStyle='#66807d';ctx.font='12px system-ui';ctx.fillText(max.toFixed(1),5,24);ctx.fillText(min.toFixed(1),5,212);ctx.strokeStyle='#0f766e';ctx.lineWidth=4;ctx.beginPath();items.forEach((x,i)=>{let px=50+(items.length===1?0:i*560/(items.length-1)),py=210-(x.weight-min)/(max-min||1)*180;if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)});ctx.stroke();items.forEach((x,i)=>{let px=50+(items.length===1?0:i*560/(items.length-1)),py=210-(x.weight-min)/(max-min||1)*180;ctx.fillStyle='#14b8a6';ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fill()})}
+function download(name,content,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+$('backup').onclick=()=>download('my-health-backup.json',JSON.stringify(data,null,2),'application/json');
+$('restoreFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!Array.isArray(obj.daily)||!Array.isArray(obj.blood))throw Error();if(confirm('Pulihkan backup? Data sedia ada akan diganti.')){data=obj;save();alert('Backup dipulihkan.')}}catch{alert('Fail backup tidak sah.')}e.target.value=''};
+$('exportCsv').onclick=()=>{const rows=[['Tarikh','Berat kg','Sistolik','Diastolik','Gula mmol/L','Simptom','Catatan'],...data.daily.map(x=>[x.date,x.weight,x.sys,x.dia,x.sugar,x.symptom,x.notes])];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');download('my-health-rekod.csv','\ufeff'+csv,'text/csv;charset=utf-8')};
+$('clearData').onclick=()=>{if(confirm('Amaran: semua rekod akan dipadam. Teruskan?')){data={daily:[],blood:[]};save();alert('Semua data dipadam.')}};
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+render();
+</script>
+</body></html>
